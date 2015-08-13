@@ -20,7 +20,7 @@ func handleServerConnection(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%v\n", r)
 	calls, _ := strconv.ParseUint(r.FormValue("calls"), 10, 64)
 	conns, _ := strconv.ParseUint(r.FormValue("conns"), 10, 64)
-	server := r.FormValue("conns")
+	server := r.FormValue("domain")
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)
