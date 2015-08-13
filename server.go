@@ -16,7 +16,7 @@ import (
 func handleServerConnection(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(64 << 20)
 	file, _, err := r.FormFile("file")
-	calls, _ := strconv.ParseUint(r.FormValue("Calls"), 10, 64)
+	calls, _ := strconv.ParseUint(r.FormValue("calls"), 10, 64)
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)
