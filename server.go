@@ -14,9 +14,12 @@ import (
 )
 
 func handleServerConnection(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Handling connection")
 	r.ParseMultipartForm(64 << 20)
 	file, _, err := r.FormFile("file")
+	fmt.Printf("%v\n", r)
 	calls, _ := strconv.ParseUint(r.FormValue("calls"), 10, 64)
+	conns, _ := strconv.ParseUint(r.FormValue("conns"), 10, 64)
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -34,7 +37,7 @@ func handleServerConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	enc := json.NewEncoder(w)
-	res := runHTTPerf(5, calls, "/tmp/file")
+	res := runHTTPerf(conns, calls, "/tmp/file")
 	enc.Encode(res)
 }
 
@@ -82,7 +85,6 @@ func parseResults(buf bytes.Buffer) map[string]string {
 	line, _ = buf.ReadBytes('\n')
 	re = regexp.MustCompile("Reply status: 1xx=([0-9]+) 2xx=([0-9]+) 3xx=([0-9]+) 4xx=([0-9]+) 5xx=([0-9]+)")
 	matches = re.FindAllSubmatch(line, 5)
-	fmt.Printf("%s\n", matches)
 
 	codes := make([]string, 5)
 
@@ -119,12 +121,11 @@ func parseResults(buf bytes.Buffer) map[string]string {
 	return resp
 }
 
-func runHTTPerf(rate uint64, calls uint64, filename string) map[string]string {
-	args := fmt.Sprintf("--hog --server=www.mbl.is --port=80 --num-calls=%d --wlog=y,%s", calls, filename)
+func runHTTPerf(conns uint64, calls uint64, filename string) map[string]string {
+	args := fmt.Sprintf("--hog --server=www.mbl.is --port=80 --num-calls=%d --wlog=y,%s --num-conns=%d", calls, filename, conns)
 	cmd := exec.Command("/usr/local/bin/httperf", strings.Fields(args)...)
 
 	var out bytes.Buffer
-	cmd.Stderr = os.Stdout
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
