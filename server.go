@@ -124,7 +124,7 @@ func parseResults(buf bytes.Buffer) map[string]string {
 
 func runHTTPerf(conns uint64, calls uint64, filename string, server string) map[string]string {
 	args := fmt.Sprintf("--hog --server=%s --port=80 --num-calls=%d --wlog=y,%s --num-conns=%d", server, calls, filename, conns)
-	cmd := exec.Command("/usr/local/bin/httperf", strings.Fields(args)...)
+	cmd := exec.Command("httperf", strings.Fields(args)...)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
