@@ -20,6 +20,7 @@ func handleServerConnection(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%v\n", r)
 	calls, _ := strconv.ParseUint(r.FormValue("calls"), 10, 64)
 	conns, _ := strconv.ParseUint(r.FormValue("conns"), 10, 64)
+	rate, _ := strconv.ParseUint(r.FormValue("rate"), 10, 64)
 	server := r.FormValue("domain")
 	defer file.Close()
 	if err != nil {
@@ -38,7 +39,7 @@ func handleServerConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	enc := json.NewEncoder(w)
-	res := runHTTPerf(conns, calls, "/tmp/file", server)
+	res := runHTTPerf(conns, calls, rate, "/tmp/file", server)
 	enc.Encode(res)
 }
 
@@ -122,8 +123,8 @@ func parseResults(buf bytes.Buffer) map[string]string {
 	return resp
 }
 
-func runHTTPerf(conns uint64, calls uint64, filename string, server string) map[string]string {
-	args := fmt.Sprintf("--hog --server=%s --port=80 --num-calls=%d --wlog=y,%s --num-conns=%d", server, calls, filename, conns)
+func runHTTPerf(conns uint64, calls uint64, rate uint64, filename string, server string) map[string]string {
+	args := fmt.Sprintf("--hog --server=%s --port=80 --num-calls=%d --wlog=y,%s --num-conns=%d --rate=%d", server, calls, filename, conns, rate)
 	cmd := exec.Command("httperf", strings.Fields(args)...)
 
 	var out bytes.Buffer
